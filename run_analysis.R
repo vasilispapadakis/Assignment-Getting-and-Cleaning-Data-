@@ -34,16 +34,9 @@ data <- rbind(test , training)
 rm(test , training)
 
 
-
-# Mean and standard deviation 
-
-sd_value <- apply( data[ , -1] , 1 , sd )
-mean_value <- rowMeans( data[ , -1] )
-
-
-
-
 #Naming the activities
+
+library(dplyr)
 
 activities <- read.table(
         "activity_labels.txt", header=FALSE, comment.char = "", quote="\"")
@@ -62,15 +55,22 @@ column_names <- c(names(data[1:2]), "activity" , column_names)
 column_names <- make.names(names=column_names, unique=TRUE, allow_ = TRUE)
 colnames(data) <- column_names
 
-rm(activities , column_names)
+rm(activities)
 
+
+#Keeping the mean and standart deviation columns
+
+asked_columns<- c(1:3 , grep( "mean|std" ,x = column_names)) 
+data<-data[,asked_columns]
+rm(asked_columns , column_names)
 
 
 #Calculating the average of each variable for each activity and each subject
 
-data<-group_by(data , subject); data <- group_by(data , activity , add = TRUE )
+data<-group_by(data , subject); data <- group_by(data , activity , .add = TRUE )
 
 columns <- names(data) ; columns <- columns[-(1:3)]
 
 mean <- summarize_at(data , .vars = columns ,.funs =  mean )
 
+write.csv(mean ,file = "Mean.csv" , row.names = FALSE) 
